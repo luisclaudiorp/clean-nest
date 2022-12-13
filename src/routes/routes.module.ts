@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { RoutesService } from './routes.service';
 import { RoutesController } from './routes.controller';
 import { RouteInMemoryRepository } from '../@core/infra/db/route-in-memory.repository';
 import { CreateRouteUseCase } from '../@core/application/create-route.use-case';
@@ -8,7 +7,7 @@ import { ListAllRoutesUseCase } from '../@core/application/list-all-routes.use-c
 
 @Module({
   controllers: [RoutesController],
-  providers: [RoutesService,
+  providers: [
     {
       provide: RouteInMemoryRepository,
       useClass: RouteInMemoryRepository
