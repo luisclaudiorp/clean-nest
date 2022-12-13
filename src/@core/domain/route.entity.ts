@@ -14,10 +14,20 @@ export class Route {
     public props: Required<RouteProps>
     constructor(props: RouteProps, id?: string){
         this.id = id || crypto.randomUUID()
+
+        if(!props){
+            //@ts-expect-error used for orm
+            this.props = {}
+            return
+        }
         this.props = {
             ...props,
             points: props.points || []
         }
+    }
+
+    static create(props: RouteProps, id?: string){
+        return new Route(props, id)
     }
 
     updateTitle(title: string){

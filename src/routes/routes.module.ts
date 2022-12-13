@@ -1,13 +1,27 @@
 import { Module } from '@nestjs/common';
 import { RoutesController } from './routes.controller';
-import { RouteInMemoryRepository } from '../@core/infra/db/route-in-memory.repository';
+import { RouteInMemoryRepository } from '../@core/infra/db/in-memory/route-in-memory.repository';
 import { CreateRouteUseCase } from '../@core/application/create-route.use-case';
 import { RouteRepositoryInterface } from '../@core/domain/route.repository';
 import { ListAllRoutesUseCase } from '../@core/application/list-all-routes.use-case';
+import { TypeOrmModule, getDataSourceToken } from '@nestjs/typeorm/dist';
+import { RouteSchema } from '../@core/infra/db/typeorm/route.schema';
+import { RouteTypeOrmRepository } from '../@core/infra/db/typeorm/route-typorm.repository';
+import { DataSource } from 'typeorm';
+import { Route } from '../@core/domain/route.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([ RouteSchema ])],
   controllers: [RoutesController],
   providers: [
+    {
+      provide: RouteTypeOrmRepository,
+      useFactory: (dataSource: DataSource) => {
+        return new RouteTypeOrmRepository(dataSource.getRepository(Route))
+      },
+      inject: [ getDataSourceToken() ]
+      ,
+    },
     {
       provide: RouteInMemoryRepository,
       useClass: RouteInMemoryRepository
@@ -17,14 +31,14 @@ import { ListAllRoutesUseCase } from '../@core/application/list-all-routes.use-c
       useFactory: (routeRepo: RouteRepositoryInterface) =>{
         return new CreateRouteUseCase(routeRepo)
       },
-      inject: [RouteInMemoryRepository]
+      inject: [RouteTypeOrmRepository]
     },
     {
       provide: ListAllRoutesUseCase,
       useFactory: (routeRepo: RouteRepositoryInterface) =>{
         return new ListAllRoutesUseCase(routeRepo)
       },
-      inject: [RouteInMemoryRepository]
+      inject: [RouteTypeOrmRepository]
     },
 
   ]
